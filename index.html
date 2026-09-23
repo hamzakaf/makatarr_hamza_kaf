@@ -1,875 +1,840 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8" />
-<title> لعبة مقطار </title>
-<style>
-    /* الأنماط (CSS) */
-    body {
-        background: linear-gradient(to bottom, #f7f2e8, #eae3d2);
-        font-family: 'Tahoma', sans-serif;
-        text-align: center;
-        padding: 0; /* تم تعديله ليتناسب مع الشريط العلوي */
-        overflow-x: hidden;
-        position: relative;
-        min-height: 100vh;
-        margin: 0; /* إزالة الهامش الافتراضي للجسم */
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>لعبة السلم والزحليقة التعليمية</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent-color: #f59e0b;
+            --accent-hover: #d97706;
+            --text-color: #f8fafc;
+            --board-bg: #1e293b;
+            --grid-border: #334155;
+        }
 
-    /* --- التعديل الجديد: شريط الملاحظة العلوي --- */
-    .note-bar {
-        background-color: #C2B280; /* نفس لون الأزرار */
-        color: #333;
-        padding: 10px 20px; /* **تصغير حجم الشريط عموديًا** */
-        font-size: 0.9em; /* **تصغير الخط أكثر** */
-        font-weight: bold;
-        text-align: center;
-        width: 100%;
-        box-sizing: border-box; /* لضمان أن الحشو لا يوسع الشريط خارج 100% */
-        position: relative; /* لضمان ظهورها في الأعلى */
-        z-index: 100; /* لضمان ظهورها فوق العناصر الأخرى */
-        line-height: 1.5; /* تحسين تباعد الأسطر */
-    }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-    .note-bar .highlight-note {
-        color: red; /* لون أحمر لكلمة "ملاحظة" */
-    }
-    /* --- نهاية تعديل شريط الملاحظة --- */
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 10px;
+        }
 
-    h3 {
-        color: #375233;
-        font-size: 20px;
-        margin-bottom: 20px;
-        display: block;
-    }
+        header {
+            text-align: center;
+            margin-bottom: 12px;
+            width: 100%;
+        }
 
-    .logo {
-        display: none; /* أو أزله إذا لم يكن مستخدمًا */
-    }
+        h1 {
+            color: #fbbf24;
+            font-size: clamp(1.2rem, 4vw, 2rem);
+            margin-bottom: 4px;
+        }
 
-    .top-boxes {
-        display: flex;
-        justify-content: center;
-        gap: 25px;
-        margin: 25px 0;
-        /* **التعديل هنا: إضافة مسافة علوية كافية بين الشبكة ومربعات الفرق** */
-        margin-top: 80px;
-    }
+        p.subtitle {
+            color: #94a3b8;
+            font-size: clamp(0.75rem, 2.5vw, 0.95rem);
+        }
 
-    .top-boxes div {
-        width: 120px;
-        height: 90px;
-        line-height: 90px;
-        border-radius: 14px;
-        font-weight: bold;
-        font-size: 36px;
-        color: white; /* لجعل الأرقام بيضاء */
-        display: flex; /* لتمكين وضع الاسم والنقطة فوق بعض */
-        flex-direction: column; /* لتمكين وضع الاسم والنقطة فوق بعض */
-        align-items: center;
-        justify-content: center;
-        position: relative; /* لتمكين وضع اسم الفريق بشكل مطلق */
-    }
+        .main-container {
+            display: flex;
+            flex-direction: row-reverse;
+            gap: 15px;
+            max-width: 1100px;
+            width: 100%;
+            justify-content: center;
+            align-items: flex-start;
+        }
 
-    /* **التعديل هنا: تنسيق اسم الفريق داخل المربع** */
-    .top-boxes div .team-name-display {
-        position: absolute;
-        top: -75px; /* **زيادة المسافة بين الاسم والمربع بشكل أكبر** */
-        font-size: 0.9em; /* حجم خط أصغر لاسم الفريق */
-        color: black; /* لون أسود لاسم الفريق */
-        font-weight: bold;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* خط جميل */
-        white-space: nowrap; /* لمنع الكسر في حال الاسم طويل */
-    }
+        @media (max-width: 850px) {
+            .main-container {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
 
-    /* **التعديل هنا: تنسيق الرقم داخل المربع** */
-    .top-boxes div span:last-child {
-        font-size: 1.2em; /* تكبير حجم الرقم قليلاً */
-        display: block; /* لضمان أن يكون في سطر منفصل عن الاسم */
-        line-height: 1; /* ضبط ارتفاع السطر */
-    }
+        .controls-panel {
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 350px;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
 
-    .box-1 { background-color: #99ccff; }
-    .box-2 { background-color: #ffe066; }
-    .box-3 { background-color: #a8e6a3; }
+        .panel-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
 
-    .grid {
-        display: grid;
-        grid-template-columns: repeat(8, 90px);
-        grid-template-rows: repeat(8, 90px);
-        gap: 12px;
-        justify-content: center;
-        position: relative; /* لجعلها فوق تأثير السقوط */
-        z-index: 10;
-    }
+        label {
+            font-size: 0.85rem;
+            color: #cbd5e1;
+            font-weight: bold;
+        }
 
-    .cell {
-        background-color: white;
-        border: 2px solid #a0a087;
-        border-radius: 14px;
-        cursor: pointer;
-        font-size: 38px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-    }
+        select, button {
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid #475569;
+            background-color: #0f172a;
+            color: white;
+            font-size: 0.9rem;
+            outline: none;
+        }
 
-    .corner {
-        pointer-events: none;
-        background-color: #C2B280 !important;
-        font-size: 48px;
-        transform: rotate(180deg);
-    }
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: #000;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 12px;
+            border-radius: 8px;
+        }
 
-    .buttons {
-        margin-top: 50px;
-        display: flex;
-        justify-content: center;
-        gap: 40px;
-    }
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
 
-    button {
-        padding: 24px 40px;
-        font-size: 26px;
-        color: white;
-        border: none;
-        border-radius: 14px;
-        cursor: pointer;
-        transition: background-color 0.3s ease;
-        background-color: #C2B280; /* لون موحد للزرين */
-    }
+        .btn-secondary {
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+        }
 
-    button:hover {
-        background-color: #4f7044;
-    }
+        .status-card {
+            background: #0f172a;
+            border-radius: 8px;
+            padding: 10px;
+            border-right: 4px solid var(--accent-color);
+            text-align: center;
+        }
 
-    .firework {
-        position: absolute;
-        width: 12px;
-        height: 12px;
-        background-color: gold;
-        border-radius: 50%;
-        animation: explode 1s ease-out forwards;
-        z-index: 999;
-    }
+        .player-turn-display {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #38bdf8;
+        }
 
-    @keyframes explode {
-        0% { transform: scale(1); opacity: 1; }
-        100% { transform: scale(3); opacity: 0; }
-    }
+        .players-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
 
-    .congrats-text {
-        position: fixed;
-        top: 40%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        font-size: 90px;
-        color: black;
-        font-weight: bold;
-        display: none;
-        z-index: 1000;
-        text-shadow: 1px 1px 3px #888;
-    }
+        .player-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 6px 10px;
+            background: #0f172a;
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
 
-    /* أنماط الأشكال المتساقطة */
-    .falling-shape {
-        position: absolute;
-        top: -50px; /* تبدأ من خارج الشاشة */
-        width: 30px;
-        height: 30px;
-        background-color: transparent; /* اجعل الخلفية شفافة */
-        border-radius: 50%; /* افتراضي لدائرة */
-        z-index: 1; /* خلف الشبكة */
-        opacity: 0.6; /* تقليل الشفافية قليلاً لجعلها أقل حدة */
-        animation: fall linear infinite;
-    }
+        .player-badge {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-left: 6px;
+        }
 
-    .falling-star {
-        clip-path: polygon(
-            50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%,
-            50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%
-        );
-        background-color: #a67c00;
-    }
+        .board-container {
+            position: relative;
+            width: min(92vw, 550px);
+            height: min(92vw, 550px);
+            background-color: var(--board-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
+            border: 3px solid #475569;
+            touch-action: manipulation;
+        }
 
-    .falling-circle {
-        border-radius: 50%;
-        background-color: #c19a6b;
-    }
+        .board-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            grid-template-rows: repeat(10, 1fr);
+            width: 100%;
+            height: 100%;
+        }
 
-    @keyframes fall {
-        0% { transform: translateY(-50px) translateX(0) rotate(0deg); opacity: 0.6; }
-        100% { transform: translateY(110vh) translateX(calc(-10% + (var(--random-x) * 120%))) rotate(360deg); opacity: 0.6; }
-    }
+        .cell {
+            border: 1px solid var(--grid-border);
+            display: flex;
+            align-items: flex-start;
+            justify-content: flex-start;
+            padding: 2px 4px;
+            font-size: clamp(0.55rem, 1.8vw, 0.75rem);
+            font-weight: bold;
+            color: #64748b;
+            position: relative;
+            user-select: none;
+        }
 
-    /* تنسيقات نافذة التعليمات المنبثقة */
-    .popup-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.7);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 1001;
-    }
+        .cell:nth-child(even) {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
 
-    .game-instructions-popup {
-        background: white;
-        padding: 30px 40px;
-        border-radius: 20px;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-        max-width: 600px;
-        text-align: center;
-        position: relative;
-        font-size: 20px;
-        color: #333;
-        max-height: 85vh;
-        overflow-y: auto;
-    }
+        .cell-100 {
+            background-color: rgba(245, 158, 11, 0.2) !important;
+            color: #fbbf24;
+            font-weight: 900;
+        }
 
-    .game-instructions-popup h2 {
-        color: #375233;
-        font-size: 38px;
-        margin-bottom: 25px;
-    }
+        #svg-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
+        }
 
-    .game-instructions-popup p {
-        margin-bottom: 15px;
-        line-height: 1.6;
-        font-size: 22px;
-        text-align: justify;
-        text-align-last: right;
-    }
+        .tokens-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 3;
+        }
 
-    .game-instructions-popup ul {
-        list-style: none;
-        padding: 0;
-        text-align: right;
-        margin: 20px 0;
-    }
+        .token {
+            position: absolute;
+            width: clamp(16px, 4vw, 24px);
+            height: clamp(16px, 4vw, 24px);
+            border-radius: 50%;
+            border: 2px solid #ffffff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.6);
+            transition: all 0.3s ease;
+            transform: translate(-50%, -50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(0.5rem, 1.5vw, 0.7rem);
+            font-weight: bold;
+            color: white;
+        }
 
-    .game-instructions-popup ul li {
-        margin-bottom: 10px;
-        font-size: 22px;
-    }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+        }
 
-    .game-instructions-popup button {
-        background-color: #375233;
-        color: white;
-        padding: 15px 30px;
-        font-size: 22px;
-        border: none;
-        border-radius: 10px;
-        cursor: pointer;
-        margin-top: 20px;
-        transition: background-color 0.3s ease;
-    }
+        .modal.active {
+            display: flex;
+        }
 
-    .game-instructions-popup button:hover {
-        background-color: #4f7044;
-    }
-    .advice-list {
-        list-style-type: arabic-indic;
-        padding-right: 25px;
-        text-align: right;
-    }
-    .advice-list li {
-        font-size: 22px;
-        margin-bottom: 10px;
-    }
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: 12px;
+            width: 100%;
+            max-width: 450px;
+            padding: 20px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5);
+            border: 1px solid #475569;
+        }
 
-    /* **التعديلات هنا: تنسيقات شاشة تسمية الفرق الجديدة** */
-    .naming-overlay {
-        display: none; /* مخفي في البداية */
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(62, 95, 83, 0.7); /* لون أخضر داكن شفاف (RGB لأحد ألوان الخلفية) */
-        backdrop-filter: blur(2px); /* لإضافة تأثير ضبابي خفيف للخلفية */
-        justify-content: center;
-        align-items: center;
-        z-index: 1000; /* لضمان ظهوره فوق كل شيء */
-    }
-    .naming-overlay-content {
-        background-color: white;
-        padding: 30px;
-        border-radius: 10px;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-        text-align: center;
-        width: 90%;
-        max-width: 450px;
-    }
-    .naming-overlay-content h2 {
-        color: #375233;
-        margin-bottom: 25px;
-        font-size: 2em;
-    }
-    .naming-overlay-content input[type="text"] {
-        display: block;
-        width: calc(100% - 20px); /* 100% عرض مع مراعاة الحشو */
-        padding: 12px;
-        margin-bottom: 15px;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        font-size: 1.1em;
-        text-align: right; /* لجعل النص يبدأ من اليمين */
-        direction: rtl; /* لضمان دعم اللغة العربية */
-    }
-    .naming-overlay-content button {
-        padding: 12px 25px;
-        background-color: #4CAF50;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 1.1em;
-        margin-top: 15px;
-    }
-    .naming-overlay-content button:hover {
-        background-color: #45a049;
-    }
-    /* --- نهاية تنسيقات شاشة تسمية الفرق الجديدة --- */
-</style>
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            border-bottom: 1px solid #475569;
+            padding-bottom: 8px;
+        }
+
+        .category-badge {
+            background: #3b82f6;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .question-text {
+            font-size: clamp(0.95rem, 3vw, 1.1rem);
+            line-height: 1.5;
+            margin-bottom: 15px;
+            color: #f8fafc;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .option-btn {
+            background: #0f172a;
+            border: 1px solid #475569;
+            color: white;
+            text-align: right;
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .btn-swap {
+            background: transparent;
+            border: 1px solid #f59e0b;
+            color: #f59e0b;
+            cursor: pointer;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+        }
+
+        .log-panel {
+            background: #0f172a;
+            border-radius: 8px;
+            padding: 8px;
+            height: 90px;
+            overflow-y: auto;
+            font-size: 0.75rem;
+            color: #94a3b8;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .log-entry.success { color: #4ade80; }
+        .log-entry.danger { color: #f87171; }
+        .log-entry.info { color: #38bdf8; }
+    </style>
 </head>
 <body>
 
-<div class="note-bar">
-    <span class="highlight-note">ملاحظة:</span> هذه النسخة لشخص واحد فقط وتابعة لمتجر همزة كاف لذلك هي غير قابلة للنشر أو البيع ومن يخالف ذلك سيتم اتخاذ الإجراءات القانونية في هذا الأمر وللتذكير بذمتك وأمانتك:
-    "قال ﷺ "لا إيمان لمن لا أمانة له، ولا دين لمن لا عهد له"
-</div>
+    <header>
+        <h1>لعبة السلم والزحليقة التعليمية</h1>
+        <p class="subtitle">أجب على الأسئلة للتقدم وتجنب الزحاليق واصعد السلالم!</p>
+    </header>
 
+    <div class="main-container">
+        
+        <div class="controls-panel">
+            <div class="panel-group">
+                <label for="category-select">اختر القسم / المادة:</label>
+                <select id="category-select" onchange="changeCategory()">
+                    <option value="math">الرياضيات</option>
+                    <option value="science">العلوم</option>
+                    <option value="hadith">الحديث</option>
+                    <option value="fiqh">الفقه</option>
+                    <option value="geo">الجغرافيا</option>
+                    <option value="arabic">اللغة العربية</option>
+                    <option value="mixed" selected>متنوع (جميع المواد)</option>
+                </select>
+            </div>
 
+            <div class="panel-group">
+                <label for="player-count">عدد اللاعبين:</label>
+                <select id="player-count" onchange="resetGame()">
+                    <option value="2">2 لاعبين</option>
+                    <option value="3">3 لاعبين</option>
+                    <option value="4">4 لاعبين</option>
+                </select>
+            </div>
 
-<div class="top-boxes">
-    <div class="box-1" id="teamBox0">
-        <span class="team-name-display" id="teamName0"></span>
-        <span>٠</span>
-    </div>
-    <div class="box-2" id="teamBox1">
-        <span class="team-name-display" id="teamName1"></span>
-        <span>٠</span>
-    </div>
-    <div class="box-3" id="teamBox2">
-        <span class="team-name-display" id="teamName2"></span>
-        <span>٠</span>
-    </div>
-</div>
+            <button class="btn-primary" onclick="triggerQuestion()">إظهار السؤال 🎲</button>
 
-<div class="grid" id="grid"></div>
+            <div class="status-card">
+                <label style="font-size: 0.75rem;">الدور الحالي:</label>
+                <div class="player-turn-display" id="turn-display">اللاعب 1</div>
+            </div>
 
-<div class="buttons">
-    <button onclick="resetGrid()">إعادة تعيين</button>
-    <button onclick="showNamingOverlay()">تسمية الفرق</button>
-</div>
+            <div class="panel-group">
+                <label>مواقع اللاعبين:</label>
+                <div class="players-list" id="players-list"></div>
+            </div>
 
-<div id="congratsText" class="congrats-text"></div>
+            <div class="panel-group">
+                <label>سجل الأحداث:</label>
+                <div class="log-panel" id="log-panel"></div>
+            </div>
 
-<audio id="clapSound" src="https://cdn.pixabay.com/audio/2022/03/15/audio_3b5bb8f3b4.mp3"></audio>
+            <button class="btn-secondary" onclick="resetGame()" style="padding: 8px;">إعادة لعبة جديدة 🔄</button>
+        </div>
 
-<div id="instructionsPopupOverlay" class="popup-overlay" style="display: none;">
+        <div class="board-container">
+            <div class="board-grid" id="board-grid"></div>
+            <svg id="svg-overlay"></svg>
+            <div class="tokens-overlay" id="tokens-overlay"></div>
+        </div>
 
-    <div id="popup1" class="game-instructions-popup">
-        <h2>نصيحة علشان نلعب ونستانس… بس بدون ما ننسى الأهم </h2>
-        <ul class="advice-list">
-            <li>١. ⏰ "اللعب ممتع، بس خلّه بعد الصلاة، عشان ما تضيع عليك فرض"</li>
-            <li>٢. 📖 "اللعبة حلوة، بس القرآن أحلى، خذ لك وقت بين الجولات وارتّح مع كلام الله."</li>
-            <li>٣. 🙏 "إذا جاء وقت الصلاة، نوقف اللعب ونكسب رضا رب العالمين."</li>
-            <li>٤. ✋ "نلعب ونضحك، لكن ما نخلي اللعب يلهينا عن طاعة الله."</li>
-            <li>٥. 📚 "اللعب ما يمنع إنك تذاكر، نظّم وقتك وخلّ اللعب مكافأة بعد الإنجاز."</li>
-            <li>٦. 🎯 "اللعبة جزء من يومنا، مو كل يومنا… لا تنسى أهدافك وطموحاتك."</li>
-            <li>٧. ⌛ "وقت المذاكرة غالي، لا تخليه يضيع على حساب لعبة ممكن تلعبها بأي وقت."</li>
-        </ul>
-        <p>تذكر <strong>"إذا لعبت وانت محافظ على صلاتك واذكارك وقراءة القران وخلصت المذاكره والاشغال الي عليك … أنت كسبت الدنيا والآخرة بإذن الله"</strong></p>
-        <button onclick="showNextPopup(2)">التالي</button>
-    </div>
-
-    <div id="popup2" class="game-instructions-popup" style="display: none;">
-        <h2>تعليمات لعبة مقطار</h2>
-
-        <h3>■ فكرة اللعبة:</h3>
-        <p>لعبة "مقطار" هي تحدٍّ بين لاعبين (2-3) أو فريقين (2-3)، الهدف فيها هو تكوين مقطارين داخل شبكة المربعات. كل مقطار يتكون من ٤ مربعات متجاورة من نفس اللون.</p>
-
-        <h3>■ شروط الفوز:</h3>
-        <ul>
-            <li>1- يفوز اللاعب أو الفريق الذي يتمكن أولًا من تكوين مقطارين (كل منهما مكوّن من ٤ مربعات متصلة من نفس اللون).</li>
-            <li>2- المقطاران لا يجوز أن يشتركا في أكثر من مربع واحد فقط من المربعات التي تم تلوينها.</li>
-            <li>3- يُسمح أن يبدأ أحد المقطارين أو ينتهي في أحد الزوايا الأربع الثابتة، وتُعتبر هذه الزوايا نقطة محايدة يمكن للجميع استخدامها بحرية في تكوين المقاطير دون أن يؤثر ذلك على شرط التداخل.</li>
-        </ul>
-        <h3>تفاصيل المقطار:</h3>
-        <p>يمكن أن يكون المقطار في شكل خط مستقيم (أفقي أو رأسي أو قطري) من ٤ مربعات من نفس اللون.</p>
-
-        <h3>■ الزوايا الثابتة:</h3>
-        <p>الزوايا الأربع لا يمكن تغيير لونها ولكن يمكن استخدامها كنقطة بداية أو نهاية لأي مقطار من أي فريق. وتُحتسب ضمن "عدد" المربعات الأربعة.</p>
-
-        <h3>■ طريقة اللعب:</h3>
-        <p>عند النقر على مربع، يتغيّر لونه بالتسلسل: أبيض ← أزرق فاتح ← أصفر فاتح ← أخضر فاتح ← أبيض.</p>
-        <p>كل لاعب أو فريق يختار لونًا ويعمل على بناء المقطارات حسب دوره. في كل دور يتم توجيه سؤال للفريق باستخدام ملف الأسئلة وعند الإجابة الصحيحة يقوم الفريق بتلوين مربع بلونه وهكذا كل فريق عند دوره يقوم بنفس الخطوات والهدف بناء مقطارين من ٤ مربعات بلون الفريق.</p>
-
-        <h3>■ أزرار التحكم:</h3>
-        <p><strong>زر إعادة تعيين:</strong> يعيد الشبكة إلى حالتها الأصلية (كل المربعات بيضاء ما عدا الزوايا).</p>
-
-        <button onclick="closeInstructionsPopup()">ابدأ اللعب</button>
     </div>
 
-</div>
-
-<div id="namingOverlay" class="naming-overlay">
-    <div class="naming-overlay-content">
-        <h2>تسمية الفرق</h2>
-        <input type="text" id="inputTeam0" placeholder="اسم الفريق الأول (الأزرق)">
-        <input type="text" id="inputTeam1" placeholder="اسم الفريق الثاني (الأصفر)">
-        <input type="text" id="inputTeam2" placeholder="اسم الفريق الثالث (الأخضر)">
-        <button id="saveTeamNamesBtn">حفظ الأسماء</button>
+    <div class="modal" id="question-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="category-badge" id="modal-category">الرياضيات</span>
+                <span style="font-size: 0.75rem; color: #94a3b8;" id="modal-steps">التقدم: 2 خطوات</span>
+            </div>
+            <div class="question-text" id="modal-question">جارِ تحميل السؤال...</div>
+            <div class="options-container" id="modal-options"></div>
+            <div style="display: flex; justify-content: flex-end;">
+                <button class="btn-swap" onclick="swapQuestion()">🔄 تبديل السؤال</button>
+            </div>
+        </div>
     </div>
-</div>
 
-<script>
-    const colors = ["white", "#99ccff", "#ffe066", "#a8e6a3"];
-    const grid = document.getElementById("grid");
-    const rows = 8;
-    const cols = 8;
+    <script>
+        const playerColors = ['#ef4444', '#3b82f6', '#10b981', '#f59e0b'];
+        const playerNames = ['اللاعب 1', 'اللاعب 2', 'اللاعب 3', 'اللاعب 4'];
+        
+        let players = [];
+        let currentPlayerIndex = 0;
+        let activeCategory = 'mixed';
+        let currentQuestionObj = null;
+        let usedQuestions = new Set();
 
-    // تعريف الزوايا الأربع
-    const cornerCellIndices = [0, cols - 1, rows * cols - cols, rows * cols - 1];
+        const ladders = [
+            { start: 4, end: 14, color: '#4ade80' },
+            { start: 9, end: 31, color: '#38bdf8' },
+            { start: 20, end: 38, color: '#facc15' },
+            { start: 28, end: 84, color: '#a855f7' },
+            { start: 40, end: 59, color: '#fb923c' },
+            { start: 63, end: 81, color: '#f43f5e' },
+            { start: 71, end: 91, color: '#2dd4bf' }
+        ];
 
-    const gridData = new Array(rows * cols).fill(0); // 0 for white, 1 for blue, 2 for yellow, 3 for green
-    let currentPopupIndex = 1;
+        const slides = [
+            { start: 17, end: 7, color: '#ec4899' },
+            { start: 54, end: 34, color: '#eab308' },
+            { start: 62, end: 19, color: '#06b6d4' },
+            { start: 64, end: 60, color: '#8b5cf6' },
+            { start: 87, end: 24, color: '#ef4444' },
+            { start: 93, end: 73, color: '#10b981' },
+            { start: 99, end: 78, color: '#f97316' }
+        ];
 
-    // **التعديل هنا: تعريف عناصر شاشة تسمية الفرق**
-    const namingOverlay = document.getElementById('namingOverlay');
-    const saveTeamNamesBtn = document.getElementById('saveTeamNamesBtn');
-    const teamNameDisplays = [
-        document.getElementById('teamName0'),
-        document.getElementById('teamName1'),
-        document.getElementById('teamName2')
-    ];
-    const teamInputFields = [
-        document.getElementById('inputTeam0'),
-        document.getElementById('inputTeam1'),
-        document.getElementById('inputTeam2')
-    ];
-
-    function indexToRC(index) {
-        return { row: Math.floor(index / cols), col: index % cols };
-    }
-
-    function rcToIndex(r, c) {
-        return r * cols + c;
-    }
-
-    // إنشاء خلايا الشبكة عند تحميل الصفحة
-    for (let i = 0; i < rows * cols; i++) {
-        const cell = document.createElement("div");
-        cell.className = "cell";
-
-        if (cornerCellIndices.includes(i)) {
-            cell.classList.add("corner");
-            cell.textContent = "Ã"; // يمكن تغيير هذا الحرف لرمز آخر يمثل الزاوية
-        } else {
-            cell.dataset.index = i; // تخزين index الخلية
-            cell.onclick = (event) => {
-                const cellIndex = parseInt(event.target.dataset.index);
-                let currentIndex = gridData[cellIndex]; // استخدام cellIndex للوصول للعنصر الصحيح
-                let nextIndex = (currentIndex + 1) % colors.length;
-                gridData[cellIndex] = nextIndex; // تحديث العنصر الصحيح في gridData
-                event.target.style.backgroundColor = colors[nextIndex]; // تطبيق اللون الصحيح
-                checkForCongrats();
-            };
-        }
-        grid.appendChild(cell); // هذا السطر هو الذي يضيف المربع إلى الشبكة
-    }
-
-    // دالة جديدة للتحقق من الصف أو العمود أو القطر الكامل من الزاوية إلى الزاوية
-    function isFullLineCornerToCorner(targetColorIndex) {
-        // التحقق من جميع الصفوف الأفقية
-        for (let r = 0; r < rows; r++) {
-            let allCellsMatch = true;
-            for (let c = 0; c < cols; c++) {
-                const idx = rcToIndex(r, c);
-                if (!cornerCellIndices.includes(idx)) { // إذا لم تكن خلية زاوية
-                    if (gridData[idx] !== targetColorIndex) { // استخدم gridData[idx]
-                        allCellsMatch = false;
-                        break;
-                    }
+        const questionGenerators = {
+            math: () => {
+                const type = Math.floor(Math.random() * 4);
+                let q, ans, opts;
+                if (type === 0) {
+                    const a = Math.floor(Math.random() * 40) + 10;
+                    const b = Math.floor(Math.random() * 40) + 10;
+                    q = `ما حاصل جمع ${a} + ${b}؟`;
+                    ans = a + b;
+                    opts = [ans, ans + 2, ans - 3, ans + 5];
+                } else if (type === 1) {
+                    const a = Math.floor(Math.random() * 10) + 2;
+                    const b = Math.floor(Math.random() * 10) + 2;
+                    q = `ما حاصل ضرب ${a} × ${b}؟`;
+                    ans = a * b;
+                    opts = [ans, ans + a, ans - b, ans + 4];
+                } else if (type === 2) {
+                    const a = Math.floor(Math.random() * 50) + 20;
+                    const b = Math.floor(Math.random() * 20) + 1;
+                    q = `ما حاصل طرح ${a} - ${b}؟`;
+                    ans = a - b;
+                    opts = [ans, ans + 1, ans - 2, ans + 3];
+                } else {
+                    const b = Math.floor(Math.random() * 8) + 2;
+                    const ansVal = Math.floor(Math.random() * 8) + 2;
+                    const a = b * ansVal;
+                    q = `ما حاصل قسمة ${a} ÷ ${b}؟`;
+                    ans = ansVal;
+                    opts = [ans, ans + 1, ans + 2, Math.max(1, ans - 1)];
                 }
+                opts = Array.from(new Set(opts)).sort(() => Math.random() - 0.5);
+                return { question: q, options: opts.map(String), answer: String(ans), cat: 'الرياضيات' };
+            },
+            science: () => {
+                const staticQ = [
+                    { q: "ما هو الكوكب الأقرب إلى الشمس؟", opts: ["عطارد", "الزهرة", "الأرض", "المريخ"], ans: "عطارد" },
+                    { q: "ما هو العنصر الكيميائي الذي رمزه O؟", opts: ["الأكسجين", "الذهب", "الهيدروجين", "الحديد"], ans: "الأكسجين" },
+                    { q: "ما هي العضو المسئول عن ضخ الدم في جسم الإنسان؟", opts: ["القلب", "الرئتان", "الكبد", "الدماغ"], ans: "القلب" },
+                    { q: "ما الغاز الذي تنتجه النباتات أثناء البناء الضوئي؟", opts: ["الأكسجين", "ثاني أكسيد الكربون", "النيتروجين", "الهيليوم"], ans: "الأكسجين" }
+                ];
+                const item = staticQ[Math.floor(Math.random() * staticQ.length)];
+                return { question: item.q, options: item.opts.sort(() => Math.random() - 0.5), answer: item.ans, cat: 'العلوم' };
+            },
+            hadith: () => {
+                const staticQ = [
+                    { q: "من القائل: 'إنما الأعمال بالنيات'؟", opts: ["الرسول محمد ﷺ", "أبو بكر الصديق", "عمر بن الخطاب", "علي بن أبي طالب"], ans: "الرسول محمد ﷺ" },
+                    { q: "أكثر الصحابة رواية للحديث النبوي الشريف هو:", opts: ["أبو هريرة رضي الله عنه", "أنس بن مالك", "عبدالله بن عمر", "ابن عباس"], ans: "أبو هريرة رضي الله عنه" }
+                ];
+                const item = staticQ[Math.floor(Math.random() * staticQ.length)];
+                return { question: item.q, options: item.opts.sort(() => Math.random() - 0.5), answer: item.ans, cat: 'الحديث' };
+            },
+            fiqh: () => {
+                const staticQ = [
+                    { q: "كم عدد أركان الإسلام؟", opts: ["5", "6", "4", "7"], ans: "5" },
+                    { q: "الشرط الأساسي لصحة الصلاة هو:", opts: ["الوضوء والطهارة", "الصدقة", "الصيام", "قراءة السور الطويلة"], ans: "الوضوء والطهارة" }
+                ];
+                const item = staticQ[Math.floor(Math.random() * staticQ.length)];
+                return { question: item.q, options: item.opts.sort(() => Math.random() - 0.5), answer: item.ans, cat: 'الفقه' };
+            },
+            geo: () => {
+                const staticQ = [
+                    { q: "ما هي أكبر قارة في العالم من حيث المساحة؟", opts: ["آسيا", "أفريقيا", "أوروبا", "أمريكا الشمالية"], ans: "آسيا" },
+                    { q: "ما عاصمة المملكة العربية السعودية؟", opts: ["الرياض", "جدة", "مكة المكرمة", "الدمام"], ans: "الرياض" }
+                ];
+                const item = staticQ[Math.floor(Math.random() * staticQ.length)];
+                return { question: item.q, options: item.opts.sort(() => Math.random() - 0.5), answer: item.ans, cat: 'الجغرافيا' };
+            },
+            arabic: () => {
+                const staticQ = [
+                    { q: "ما هو الجمع الصحيح لكلمة 'كتاب'؟", opts: ["كتب", "كتابات", "كتّاب", "أكتبة"], ans: "كتب" },
+                    { q: "عكس كلمة 'الأمل' هو:", opts: ["البيأس", "الخوف", "الحزن", "الغضب"], ans: "البيأس" }
+                ];
+                const item = staticQ[Math.floor(Math.random() * staticQ.length)];
+                return { question: item.q, options: item.opts.sort(() => Math.random() - 0.5), answer: item.ans, cat: 'اللغة العربية' };
             }
-            if (allCellsMatch) {
-                return true; // تم العثور على صف أفقي كامل
-            }
-        }
-
-        // التحقق من جميع الأعمدة العمودية
-        for (let c = 0; c < cols; c++) {
-            let allCellsMatch = true;
-            for (let r = 0; r < rows; r++) {
-                const idx = rcToIndex(r, c);
-                if (!cornerCellIndices.includes(idx)) { // إذا لم تكن خلية زاوية
-                    if (gridData[idx] !== targetColorIndex) { // استخدم gridData[idx]
-                        allCellsMatch = false;
-                        break;
-                    }
-                }
-            }
-            if (allCellsMatch) {
-                return true; // تم العثور على عمود عمودي كامل
-            }
-        }
-
-        // التحقق من القطر الرئيسي (\)
-        let allCellsMatchMainDiagonal = true;
-        for (let i = 0; i < rows; i++) { // بما أن الشبكة 8x8، rows == cols
-            const idx = rcToIndex(i, i);
-            if (!cornerCellIndices.includes(idx)) {
-                if (gridData[idx] !== targetColorIndex) { // استخدم gridData[idx]
-                    allCellsMatchMainDiagonal = false;
-                    break;
-                }
-            }
-        }
-        if (allCellsMatchMainDiagonal) {
-            return true;
-        }
-
-        // التحقق من القطر الثانوي (/)
-        let allCellsMatchAntiDiagonal = true;
-        for (let i = 0; i < rows; i++) {
-            const idx = rcToIndex(i, cols - 1 - i);
-            if (!cornerCellIndices.includes(idx)) {
-                if (gridData[idx] !== targetColorIndex) { // استخدم gridData[idx]
-                    allCellsMatchAntiDiagonal = false;
-                    break;
-                }
-            }
-        }
-        if (allCellsMatchAntiDiagonal) {
-            return true;
-        }
-
-        return false; // لم يتم العثور على أي خط كامل من الزاوية للزاوية
-    }
-
-
-    function checkForCongrats() {
-        let allTrainsFound = {
-            1: [], // للمقطارات الزرقاء
-            2: [], // للمقطارات الصفراء
-            3: []  // للمقطارات الخضراء
         };
 
-        // Helper function to get cell color, treating corners as "wildcards"
-        function getEffectiveCellColor(idx, targetColorIndex) {
-            if (cornerCellIndices.includes(idx)) {
-                return targetColorIndex; // Corner acts as the target color if it's part of a potential train
+        function initBoard() {
+            const grid = document.getElementById('board-grid');
+            grid.innerHTML = '';
+
+            for (let row = 9; row >= 0; row--) {
+                const isEvenRow = (9 - row) % 2 === 1;
+                for (let col = 0; col < 10; col++) {
+                    const actualCol = isEvenRow ? (9 - col) : col;
+                    const cellNum = row * 10 + actualCol + 1;
+                    
+                    const cell = document.createElement('div');
+                    cell.className = `cell ${cellNum === 100 ? 'cell-100' : ''}`;
+                    cell.id = `cell-${cellNum}`;
+                    cell.innerText = cellNum;
+                    grid.appendChild(cell);
+                }
             }
-            return gridData[idx]; // استخدم gridData[idx]
+
+            setTimeout(drawLaddersAndSlides, 100);
         }
 
-        // Helper function to check for a 4-square train
-        // هذا الجزء سيكتشف المقاطير التي تتضمن 3 خلايا + زاوية (لأن الزاوية تُعتبر بلون الفريق)
-        function checkLine(r, c, dr, dc, targetColorIndex) {
-            const line = []; // Stores all 4 cell indices (including corners)
-            const nonCornerCells = []; // Stores only non-corner cells in this train
+        function getCellCoords(num) {
+            const cell = document.getElementById(`cell-${num}`);
+            if (!cell) return { x: 0, y: 0 };
 
-            for (let i = 0; i < 4; i++) {
-                const currR = r + i * dr;
-                const currC = c + i * dc;
-                if (currR < 0 || currR >= rows || currC < 0 || currC >= cols) {
-                    return null;
-                }
-                const idx = rcToIndex(currR, currC);
+            const boardRect = document.getElementById('board-grid').getBoundingClientRect();
+            const cellRect = cell.getBoundingClientRect();
 
-                // Check if the cell (or effective corner) matches the target color
-                if (getEffectiveCellColor(idx, targetColorIndex) !== targetColorIndex) {
-                    return null;
-                }
-                line.push(idx); // Add to the full line
-                if (!cornerCellIndices.includes(idx)) {
-                    nonCornerCells.push(idx); // Only add non-corner cells here
-                }
-            }
-
-            // Ensure no 5th consecutive cell of the same color (to ensure it's exactly 4)
-            const nextR = r + 4 * dr;
-            const nextC = c + 4 * dc;
-            if (nextR >= 0 && nextR < rows && nextC >= 0 && nextC < cols) {
-                const nextIdx = rcToIndex(nextR, nextC);
-                if (getEffectiveCellColor(nextIdx, targetColorIndex) === targetColorIndex) {
-                    return null; // A 5th cell means this isn't a 4-cell train
-                }
-            }
-            return { line: new Set(line), nonCornerCells: new Set(nonCornerCells) };
+            return {
+                x: cellRect.left - boardRect.left + cellRect.width / 2,
+                y: cellRect.top - boardRect.top + cellRect.height / 2
+            };
         }
 
-        // Collect all possible trains for each color
-        for (let targetColorIndex = 1; targetColorIndex <= 3; targetColorIndex++) {
-            // Horizontal
-            for (let r = 0; r < rows; r++) {
-                for (let c = 0; c <= cols - 4; c++) {
-                    const train = checkLine(r, c, 0, 1, targetColorIndex);
-                    if (train) allTrainsFound[targetColorIndex].push(train);
-                }
-            }
+        function drawLaddersAndSlides() {
+            const svg = document.getElementById('svg-overlay');
+            svg.innerHTML = '';
 
-            // Vertical
-            for (let c = 0; c < cols; c++) {
-                for (let r = 0; r <= rows - 4; r++) {
-                    const train = checkLine(r, c, 1, 0, targetColorIndex);
-                    if (train) allTrainsFound[targetColorIndex].push(train);
-                }
-            }
+            ladders.forEach((ladder) => {
+                const start = getCellCoords(ladder.start);
+                const end = getCellCoords(ladder.end);
 
-            // Diagonal \
-            for (let r = 0; r <= rows - 4; r++) {
-                for (let c = 0; c <= cols - 4; c++) {
-                    const train = checkLine(r, c, 1, 1, targetColorIndex);
-                    if (train) allTrainsFound[targetColorIndex].push(train);
-                }
-            }
+                const angle = Math.atan2(end.y - start.y, end.x - start.x);
+                const offsetX = Math.sin(angle) * 6;
+                const offsetY = -Math.cos(angle) * 6;
 
-            // Diagonal /
-            for (let r = 0; r <= rows - 4; r++) {
-                for (let c = 3; c < cols; c++) {
-                    const train = checkLine(r, c, 1, -1, targetColorIndex);
-                    if (train) allTrainsFound[targetColorIndex].push(train);
+                const line1 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line1.setAttribute('x1', start.x + offsetX);
+                line1.setAttribute('y1', start.y + offsetY);
+                line1.setAttribute('x2', end.x + offsetX);
+                line1.setAttribute('y2', end.y + offsetY);
+                line1.setAttribute('stroke', ladder.color);
+                line1.setAttribute('stroke-width', '3');
+
+                const line2 = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line2.setAttribute('x1', start.x - offsetX);
+                line2.setAttribute('y1', start.y - offsetY);
+                line2.setAttribute('x2', end.x - offsetX);
+                line2.setAttribute('y2', end.y - offsetY);
+                line2.setAttribute('stroke', ladder.color);
+                line2.setAttribute('stroke-width', '3');
+
+                svg.appendChild(line1);
+                svg.appendChild(line2);
+
+                const stepsCount = 6;
+                for (let i = 1; i < stepsCount; i++) {
+                    const stepX = start.x + (end.x - start.x) * (i / stepsCount);
+                    const stepY = start.y + (end.y - start.y) * (i / stepsCount);
+
+                    const step = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                    step.setAttribute('x1', stepX + offsetX);
+                    step.setAttribute('y1', stepY + offsetY);
+                    step.setAttribute('x2', stepX - offsetX);
+                    step.setAttribute('y2', stepY - offsetY);
+                    step.setAttribute('stroke', ladder.color);
+                    step.setAttribute('stroke-width', '2.5');
+                    svg.appendChild(step);
                 }
-            }
+            });
+
+            slides.forEach((slide) => {
+                const start = getCellCoords(slide.start);
+                const end = getCellCoords(slide.end);
+
+                const midX = (start.x + end.x) / 2 + (start.x < end.x ? 25 : -25);
+                const midY = (start.y + end.y) / 2 - 15;
+
+                const pathD = `M ${start.x} ${start.y} Q ${midX} ${midY} ${end.x} ${end.y}`;
+
+                const outerBorder = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                outerBorder.setAttribute('d', pathD);
+                outerBorder.setAttribute('stroke', slide.color);
+                outerBorder.setAttribute('stroke-width', '12');
+                outerBorder.setAttribute('fill', 'none');
+                outerBorder.setAttribute('stroke-linecap', 'round');
+
+                const innerTrack = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                innerTrack.setAttribute('d', pathD);
+                innerTrack.setAttribute('stroke', '#ffffff');
+                innerTrack.setAttribute('stroke-width', '7');
+                innerTrack.setAttribute('fill', 'none');
+                innerTrack.setAttribute('stroke-linecap', 'round');
+
+                svg.appendChild(outerBorder);
+                svg.appendChild(innerTrack);
+
+                const earLeft = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                earLeft.setAttribute('cx', start.x - 5);
+                earLeft.setAttribute('cy', start.y - 5);
+                earLeft.setAttribute('r', '4');
+                earLeft.setAttribute('fill', slide.color);
+
+                const earRight = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                earRight.setAttribute('cx', start.x + 5);
+                earRight.setAttribute('cy', start.y - 5);
+                earRight.setAttribute('r', '4');
+                earRight.setAttribute('fill', slide.color);
+
+                svg.appendChild(earLeft);
+                svg.appendChild(earRight);
+            });
         }
 
-        // Calculate final valid trains count for each color
-        let finalTrainsCountColor1 = 0;
-        let finalTrainsCountColor2 = 0;
-        let finalTrainsCountColor3 = 0;
+        function resetGame() {
+            const count = parseInt(document.getElementById('player-count').value);
+            players = [];
 
-        for (let targetColorIndex = 1; targetColorIndex <= 3; targetColorIndex++) {
-            let currentWinningTrainsCount = 0;
+            for (let i = 0; i < count; i++) {
+                players.push({
+                    id: i,
+                    name: playerNames[i],
+                    color: playerColors[i],
+                    position: 1
+                });
+            }
 
-            // الأولوية الأولى: التحقق من حالة الصف أو العمود أو القطر الكامل من الزاوية إلى الزاوية
-            if (isFullLineCornerToCorner(targetColorIndex)) {
-                currentWinningTrainsCount = 2; // إذا كان خط كامل، يحصل على مقطارين مباشرة
+            currentPlayerIndex = 0;
+            usedQuestions.clear();
+            renderPlayersList();
+            renderTokens();
+            updateTurnDisplay();
+            logEvent("بدأت لعبة جديدة!", "info");
+        }
+
+        function renderPlayersList() {
+            const list = document.getElementById('players-list');
+            list.innerHTML = '';
+
+            players.forEach(p => {
+                const item = document.createElement('div');
+                item.className = 'player-item';
+                item.innerHTML = `
+                    <div>
+                        <span class="player-badge" style="background: ${p.color};"></span>
+                        <span>${p.name}</span>
+                    </div>
+                    <span style="font-weight: bold; color: #fbbf24;">المربع ${p.position}</span>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function renderTokens() {
+            const overlay = document.getElementById('tokens-overlay');
+            overlay.innerHTML = '';
+
+            players.forEach(p => {
+                const coords = getCellCoords(p.position);
+                const token = document.createElement('div');
+                token.className = 'token';
+                token.style.left = `${coords.x}px`;
+                token.style.top = `${coords.y}px`;
+                token.style.backgroundColor = p.color;
+                token.innerText = p.id + 1;
+                overlay.appendChild(token);
+            });
+        }
+
+        function updateTurnDisplay() {
+            const p = players[currentPlayerIndex];
+            const display = document.getElementById('turn-display');
+            display.innerText = p.name;
+            display.style.color = p.color;
+        }
+
+        function changeCategory() {
+            activeCategory = document.getElementById('category-select').value;
+        }
+
+        function fetchQuestion() {
+            let catKey = activeCategory;
+            if (catKey === 'mixed') {
+                const keys = ['math', 'science', 'hadith', 'fiqh', 'geo', 'arabic'];
+                catKey = keys[Math.floor(Math.random() * keys.length)];
+            }
+
+            const gen = questionGenerators[catKey];
+            let qObj = gen();
+
+            let attempts = 0;
+            while (usedQuestions.has(qObj.question) && attempts < 10) {
+                qObj = gen();
+                attempts++;
+            }
+
+            usedQuestions.add(qObj.question);
+            qObj.steps = Math.floor(Math.random() * 3) + 1;
+            return qObj;
+        }
+
+        function triggerQuestion() {
+            currentQuestionObj = fetchQuestion();
+
+            document.getElementById('modal-category').innerText = currentQuestionObj.cat;
+            document.getElementById('modal-steps').innerText = `التقدم: ${currentQuestionObj.steps} خطوات`;
+            document.getElementById('modal-question').innerText = currentQuestionObj.question;
+
+            const optsContainer = document.getElementById('modal-options');
+            optsContainer.innerHTML = '';
+
+            currentQuestionObj.options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = opt;
+                btn.onclick = () => handleAnswer(opt);
+                optsContainer.appendChild(btn);
+            });
+
+            document.getElementById('question-modal').classList.add('active');
+        }
+
+        function swapQuestion() {
+            triggerQuestion();
+        }
+
+        function handleAnswer(selectedOpt) {
+            document.getElementById('question-modal').classList.remove('active');
+            const p = players[currentPlayerIndex];
+
+            if (selectedOpt === currentQuestionObj.answer) {
+                logEvent(`إجابة صحيحة! يتقدم ${p.name} ${currentQuestionObj.steps} خطوات.`, 'success');
+                movePlayer(p, currentQuestionObj.steps);
             } else {
-                // إذا لم يكن خط كامل، نعود لمنطق البحث عن زوجين مع تداخل خلية واحدة
-                const trainsOfCurrentColor = allTrainsFound[targetColorIndex];
-                const uniqueTrains = [];
-                const uniqueTrainLineStrings = new Set();
-                for (const train of trainsOfCurrentColor) {
-                    // استخدام جميع الخلايا في الخط (بما في ذلك الزوايا) لتعريف المقطار بشكل فريد
-                    const trainString = Array.from(train.line).sort((a, b) => a - b).join(',');
-                    if (!uniqueTrainLineStrings.has(trainString)) {
-                        uniqueTrains.push(train);
-                        uniqueTrainLineStrings.add(trainString);
-                    }
-                }
-
-                if (uniqueTrains.length >= 2) {
-                    let foundValidPair = false;
-                    for (let i = 0; i < uniqueTrains.length; i++) {
-                        for (let j = i + 1; j < uniqueTrains.length; j++) {
-                            const trainA = uniqueTrains[i];
-                            const trainB = uniqueTrains[j];
-
-                            // حساب الخلايا غير الزاوية المشتركة
-                            let commonNonCornerCellsCount = 0;
-                            for (const cellIdx of trainA.nonCornerCells) {
-                                if (trainB.nonCornerCells.has(cellIdx)) {
-                                    commonNonCornerCellsCount++;
-                                }
-                            }
-
-                            // الشرط: لا يجوز أن يشتركا في أكثر من مربع واحد فقط من المربعات الملونة (غير الزوايا)
-                            if (commonNonCornerCellsCount <= 1) {
-                                foundValidPair = true;
-                                currentWinningTrainsCount = 2; // تم العثور على مقطارين
-                                break;
-                            }
-                        }
-                        if (foundValidPair) break;
-                    }
-                    if (!foundValidPair && uniqueTrains.length > 0) {
-                        currentWinningTrainsCount = 1; // إذا وجد مقطار واحد على الأقل ولم يجد زوج
-                    } else if (!foundValidPair) {
-                        currentWinningTrainsCount = 0;
-                    }
-                } else {
-                    currentWinningTrainsCount = uniqueTrains.length; // عدد المقاطير المكتشفة (0 أو 1)
-                }
-            }
-
-            // **التعديل هنا: تحديث النصوص في مربعات النقاط**
-            if (targetColorIndex === 1) { // أزرق
-                document.getElementById('teamBox0').querySelector('span:last-child').textContent = currentWinningTrainsCount.toString().padStart(1, '٠');
-                finalTrainsCountColor1 = currentWinningTrainsCount;
-            } else if (targetColorIndex === 2) { // أصفر
-                document.getElementById('teamBox1').querySelector('span:last-child').textContent = currentWinningTrainsCount.toString().padStart(1, '٠');
-                finalTrainsCountColor2 = currentWinningTrainsCount;
-            } else if (targetColorIndex === 3) { // أخضر
-                document.getElementById('teamBox2').querySelector('span:last-child').textContent = currentWinningTrainsCount.toString().padStart(1, '٠');
-                finalTrainsCountColor3 = currentWinningTrainsCount;
+                logEvent(`إجابة خاطئة من ${p.name}. الإجابة هي (${currentQuestionObj.answer}).`, 'danger');
+                nextTurn();
             }
         }
 
-        let winnerMessage = "";
-        if (finalTrainsCountColor1 >= 2) {
-            const teamName = teamNameDisplays[0].textContent.trim();
-            winnerMessage = `مبروك لـ ${teamName || 'الفريق الأزرق'} 🎉`;
-        } else if (finalTrainsCountColor2 >= 2) {
-            const teamName = teamNameDisplays[1].textContent.trim();
-            winnerMessage = `مبروك لـ ${teamName || 'الفريق الأصفر'} 🎉`;
-        } else if (finalTrainsCountColor3 >= 2) {
-            const teamName = teamNameDisplays[2].textContent.trim();
-            winnerMessage = `مبروك لـ ${teamName || 'الفريق الأخضر'} 🎉`;
-        }
-
-        if (winnerMessage !== "") {
-            showCongrats(winnerMessage);
-        }
-    }
-
-    function resetGrid() {
-        // إعادة تعيين جميع الخلايا غير الزاوية إلى اللون الأبيض
-        for (let i = 0; i < rows * cols; i++) {
-            if (!cornerCellIndices.includes(i)) {
-                gridData[i] = 0; // إعادة تعيين قيمة اللون في البيانات
-                const cellElement = grid.children[i];
-                cellElement.style.backgroundColor = colors[0]; // إعادة اللون الأبيض
+        function movePlayer(player, steps) {
+            let targetPos = player.position + steps;
+            if (targetPos > 100) {
+                targetPos = 100 - (targetPos - 100);
             }
+
+            player.position = targetPos;
+            renderTokens();
+            renderPlayersList();
+
+            setTimeout(() => {
+                checkLaddersAndSlides(player);
+            }, 400);
         }
 
-        document.getElementById("congratsText").style.display = "none";
-        // **التعديل هنا: تصفير النقاط ومسح أسماء الفرق**
-        document.getElementById('teamBox0').querySelector('span:last-child').textContent = '٠';
-        document.getElementById('teamBox1').querySelector('span:last-child').textContent = '٠';
-        document.getElementById('teamBox2').querySelector('span:last-child').textContent = '٠';
+        function checkLaddersAndSlides(player) {
+            const ladder = ladders.find(l => l.start === player.position);
+            if (ladder) {
+                logEvent(`صعد ${player.name} السلم إلى المربع ${ladder.end}! 🪜`, 'success');
+                player.position = ladder.end;
+                renderTokens();
+                renderPlayersList();
+            }
 
-        teamNameDisplays.forEach(span => span.textContent = ''); // مسح أسماء الفرق
-        teamInputFields.forEach(input => input.value = ''); // مسح حقول الإدخال في نافذة التسمية
-    }
+            const slide = slides.find(s => s.start === player.position);
+            if (slide) {
+                logEvent(`انزلق ${player.name} بالزحليقة إلى المربع ${slide.end}! 🛝`, 'danger');
+                player.position = slide.end;
+                renderTokens();
+                renderPlayersList();
+            }
 
-    function showCongrats(message) {
-        const sound = document.getElementById("clapSound");
-        const text = document.getElementById("congratsText");
-        sound.currentTime = 0;
-        sound.play();
+            if (player.position === 100) {
+                logEvent(`🎉 فاز ${player.name} باللعبة! 🏆`, 'success');
+                alert(`🎉 مبروك! فاز ${player.name} باللعبة!`);
+                return;
+            }
 
-        text.textContent = message;
-        text.style.display = "block";
-        setTimeout(() => { text.style.display = "none"; }, 2000);
-
-        for (let i = 0; i < 50; i++) {
-            const firework = document.createElement("div");
-            firework.className = "firework";
-            firework.style.top = Math.random() * window.innerHeight + "px";
-            firework.style.left = Math.random() * window.innerWidth + "px";
-            document.body.appendChild(firework);
-            setTimeout(() => firework.remove(), 1000);
-        }
-    }
-
-    function showNextPopup(nextIndex) {
-        document.getElementById('popup' + currentPopupIndex).style.display = 'none';
-
-        if (nextIndex <= 2) {
-            document.getElementById('popup' + nextIndex).style.display = 'block';
-            currentPopupIndex = nextIndex;
-        } else {
-            closeInstructionsPopup();
-        }
-    }
-
-    function closeInstructionsPopup() {
-        document.getElementById("instructionsPopupOverlay").style.display = "none";
-    }
-
-    // دالة لإنشاء شكل متساقط
-    function createFallingShape() {
-        const shapes = [
-            { className: 'falling-star' },
-            { className: 'falling-circle' }
-        ];
-        // اختيار شكل عشوائي من المصفوفة
-        const randomShape = shapes[Math.floor(Math.random() * shapes.length)];
-
-        const shapeDiv = document.createElement('div');
-        shapeDiv.classList.add('falling-shape', randomShape.className);
-        shapeDiv.style.left = Math.random() * 100 + 'vw'; // موقع عشوائي أفقي
-        shapeDiv.style.setProperty('--random-x', Math.random()); // متغير CSS لحركة أفقية عشوائية
-        shapeDiv.style.animationDuration = (Math.random() * 12 + 12) + 's'; // سرعة أبطأ (12-24 ثواني)
-        shapeDiv.style.animationDelay = (Math.random() * -20) + 's'; // تأخير عشوائي أكبر لتبدو كأنها مستمرة
-        shapeDiv.style.opacity = 0.5 + Math.random() * 0.3; // تفاوت في الشفافية
-
-        // تحديد لون الخلفية
-        if (randomShape.className === 'falling-circle') {
-            shapeDiv.style.backgroundColor = '#c19a6b';
-        } else if (randomShape.className === 'falling-star') {
-            shapeDiv.style.backgroundColor = '#a67c00';
+            nextTurn();
         }
 
-        document.body.appendChild(shapeDiv);
+        function nextTurn() {
+            currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+            updateTurnDisplay();
+        }
 
-        // إعادة ضبط موضع الشكل عند انتهاء الأنميشن ليعطي إحساساً بالسقوط المستمر
-        shapeDiv.addEventListener('animationiteration', () => {
-            shapeDiv.style.left = Math.random() * 100 + 'vw';
-            shapeDiv.style.setProperty('--random-x', Math.random());
-            shapeDiv.style.animationDuration = (Math.random() * 12 + 12) + 's';
-            shapeDiv.style.opacity = 0.5 + Math.random() * 0.3;
+        function logEvent(msg, type = 'info') {
+            const panel = document.getElementById('log-panel');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.innerText = `• ${msg}`;
+            panel.prepend(entry);
+        }
+
+        window.addEventListener('resize', () => {
+            drawLaddersAndSlides();
+            renderTokens();
         });
-    }
 
-    // إنشاء الأشكال المتساقطة بشكل مستمر
-    function startFallingShapes() {
-        const numberOfShapes = 5; // عدد أقل لجعلها ليست كثيرة
-        for (let i = 0; i < numberOfShapes; i++) {
-            createFallingShape();
-        }
-    }
-
-    // **التعديل هنا: وظائف تسمية الفرق**
-    function showNamingOverlay() {
-        namingOverlay.style.display = 'flex';
-        // تعبئة حقول الإدخال بأسماء الفرق الحالية
-        teamInputFields.forEach((input, index) => {
-            input.value = teamNameDisplays[index].textContent.trim();
-        });
-    }
-
-    saveTeamNamesBtn.addEventListener('click', () => {
-        teamInputFields.forEach((input, index) => {
-            teamNameDisplays[index].textContent = input.value.trim();
-        });
-        namingOverlay.style.display = 'none';
-    });
-
-    // إخفاء الشاشة بالنقر خارج المحتوى
-    namingOverlay.addEventListener('click', (e) => {
-        if (e.target === namingOverlay) {
-            namingOverlay.style.display = 'none';
-        }
-    });
-
-
-    window.onload = () => {
-        document.getElementById("instructionsPopupOverlay").style.display = "flex";
-        document.getElementById('popup1').style.display = 'block';
-        currentPopupIndex = 1;
-
-        // **التعديل هنا: التأكد من إفراغ أسماء الفرق عند التحميل وتصفير النقاط**
-        teamNameDisplays.forEach(span => span.textContent = '');
-        document.getElementById('teamBox0').querySelector('span:last-child').textContent = '٠';
-        document.getElementById('teamBox1').querySelector('span:last-child').textContent = '٠';
-        document.getElementById('teamBox2').querySelector('span:last-child').textContent = '٠';
-
-
-        startFallingShapes(); // ابدأ تأثير سقوط الأشكال
-    };
-</script>
+        initBoard();
+        resetGame();
+    </script>
 </body>
 </html>
-
 
 
 
