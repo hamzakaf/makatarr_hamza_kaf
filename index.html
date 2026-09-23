@@ -37,6 +37,7 @@
             justify-content: space-between;
             padding: 15px;
             color: var(--text-color);
+            overflow-x: hidden;
         }
 
         /* --- Header & Logo --- */
@@ -313,6 +314,7 @@
             width: 100%;
             justify-content: center;
             margin: 0 auto;
+            position: relative;
         }
 
         .card {
@@ -320,6 +322,17 @@
             perspective: 1000px;
             cursor: pointer;
             position: relative;
+            transition: transform 0.6s ease-in-out;
+        }
+
+        /* Random Shuffle Animation */
+        .card.shuffling {
+            animation: shuffleAnim 0.7s ease-in-out infinite alternate;
+        }
+
+        @keyframes shuffleAnim {
+            0% { transform: translate(var(--rx, 0px), var(--ry, 0px)) rotate(var(--rot, 0deg)) scale(1.05); }
+            100% { transform: translate(calc(var(--rx, 0px) * -1), calc(var(--ry, 0px) * -1)) rotate(calc(var(--rot, 0deg) * -1)) scale(0.95); }
         }
 
         .card-inner {
@@ -400,7 +413,7 @@
             border: 1px solid #FFE0B2;
         }
 
-        /* --- Results Modal / Screen --- */
+        /* --- Results Screen --- */
         .winner-title {
             font-size: 2.2rem;
             color: #FF9800;
@@ -443,7 +456,7 @@
 
         .footer-line {
             width: 80%;
-            max-width: 600px;
+            max-width: 650px;
             height: 1px;
             background: #CBD5E1;
             margin: 0 auto 12px auto;
@@ -451,10 +464,10 @@
         }
 
         .footer-text {
-            font-size: 0.9rem;
-            color: #555;
+            font-size: 0.95rem;
+            color: #475569;
             font-weight: 700;
-            line-height: 1.5;
+            line-height: 1.6;
         }
 
         /* --- Media Queries --- */
@@ -465,6 +478,7 @@
             .card-front, .card-back { font-size: 1.5rem; }
             .card.math-card .card-back { font-size: 0.9rem; }
             h2 { font-size: 1.3rem; }
+            .footer-text { font-size: 0.85rem; }
         }
     </style>
 </head>
@@ -501,7 +515,7 @@
             <div class="setup-group">
                 <label>أسماء البطل / الأبطال:</label>
                 <div class="names-input-container" id="names-container">
-                    <!-- Dynamic inputs will be inserted here -->
+                    <!-- Dynamic inputs inserted here -->
                 </div>
             </div>
 
@@ -509,9 +523,9 @@
             <div class="setup-group">
                 <label>عمر الطفل (مستوى الصعوبة):</label>
                 <div class="options-grid" id="age-opts">
-                    <button class="opt-btn selected" onclick="setAgeGroup('easy')">3 - 5 سنوات<br><small>(سهل ومريح)</small></button>
-                    <button class="opt-btn" onclick="setAgeGroup('medium')">6 - 9 سنوات<br><small>(تحدي متكافئ)</small></button>
-                    <button class="opt-btn" onclick="setAgeGroup('math')">10+ سنوات<br><small>(تحدي الرياضيات)</small></button>
+                    <button class="opt-btn selected" onclick="setAgeGroup('easy')">5 - 7 سنوات<br><small>(سهل ومريح)</small></button>
+                    <button class="opt-btn" onclick="setAgeGroup('medium')">8 - 10 سنوات<br><small>(تحدي متكافئ)</small></button>
+                    <button class="opt-btn" onclick="setAgeGroup('math')">11+ سنة<br><small>(تحدي الرياضيات)</small></button>
                 </div>
             </div>
 
@@ -530,7 +544,7 @@
             </div>
 
             <div class="preview-banner" id="preview-banner">
-                👀 احفظ أماكن الأشكال بسرعة! (سيتم إغلاقها الآن)
+                🔀 جاري خلط الكروت عشوائياً...
             </div>
 
             <div class="cards-grid" id="cards-grid">
@@ -556,7 +570,7 @@
     <footer>
         <hr class="footer-line">
         <div class="footer-text">
-            مجانية بشكل مؤقت و لا يسمح بيعها جميع الحقوق محفوظة لي HAMZAKAF فريق و شكرا
+            صممت ❤️ ومخصصه للاطفال 5+ | اللعبة مجانية بشكل مؤقت ولا يسمح بيعها | جميع الحقوق محفوظة لي فريق HAMZAKAF
         </div>
     </footer>
 
@@ -633,7 +647,7 @@
             }
         ];
 
-        // Math Data Generator for 10+
+        // Math Data Generator for 11+
         function generateMathPairs(pairCount) {
             const pairs = [];
             const usedAnswers = new Set();
@@ -739,13 +753,13 @@
             updateScoreboard();
 
             // Calculate Grid Dimensions based on age and players
-            let pairsCount = 4; // Base pairs
+            let pairsCount = 4;
             if (ageGroup === 'easy') {
-                pairsCount = 3 + Math.min(playerCount, 3); // 4 to 6 pairs (8 to 12 cards)
+                pairsCount = 3 + Math.min(playerCount, 3); // 4 to 6 pairs
             } else if (ageGroup === 'medium') {
-                pairsCount = 6 + Math.min(playerCount, 3); // 7 to 9 pairs (14 to 18 cards)
+                pairsCount = 6 + Math.min(playerCount, 3); // 7 to 9 pairs
             } else if (ageGroup === 'math') {
-                pairsCount = 5 + Math.min(playerCount, 3); // 6 to 8 pairs (12 to 16 cards)
+                pairsCount = 5 + Math.min(playerCount, 3); // 6 to 8 pairs
             }
 
             totalPairsInStage = pairsCount;
@@ -772,19 +786,44 @@
             // Render Grid
             renderGrid();
 
-            // Peak Time / Memorize Preview
-            let previewTime = ageGroup === 'easy' ? 4000 : ageGroup === 'medium' ? 2500 : 2000;
+            // 1. Trigger Shuffle Movement Animation
             const banner = document.getElementById('preview-banner');
+            banner.textContent = "🔀 جاري خلط الكروت عشوائياً...";
             banner.style.display = 'block';
 
             const cardElements = document.querySelectorAll('.card');
-            cardElements.forEach(c => c.classList.add('peeking'));
+            cardElements.forEach(c => {
+                const randomX = (Math.random() - 0.5) * 60;
+                const randomY = (Math.random() - 0.5) * 60;
+                const randomRot = (Math.random() - 0.5) * 30;
+                c.style.setProperty('--rx', `${randomX}px`);
+                c.style.setProperty('--ry', `${randomY}px`);
+                c.style.setProperty('--rot', `${randomRot}deg`);
+                c.classList.add('shuffling');
+            });
 
+            // 2. Stop Shuffle -> Reveal Preview
             setTimeout(() => {
-                cardElements.forEach(c => c.classList.remove('peeking'));
-                banner.style.display = 'none';
-                isBoardLocked = false;
-            }, previewTime);
+                cardElements.forEach(c => {
+                    c.classList.remove('shuffling');
+                    c.style.removeProperty('--rx');
+                    c.style.removeProperty('--ry');
+                    c.style.removeProperty('--rot');
+                    c.classList.add('peeking');
+                });
+
+                banner.textContent = "👀 احفظ أماكن الأشكال بسرعة! (سيتم إغلاقها الآن)";
+
+                let previewTime = ageGroup === 'easy' ? 4000 : ageGroup === 'medium' ? 2500 : 2000;
+
+                // 3. Hide Preview -> Start Play
+                setTimeout(() => {
+                    cardElements.forEach(c => c.classList.remove('peeking'));
+                    banner.style.display = 'none';
+                    isBoardLocked = false;
+                }, previewTime);
+
+            }, 1800);
         }
 
         function renderGrid() {
@@ -861,12 +900,12 @@
                     card1.element.classList.remove('flipped');
                     card2.element.classList.remove('flipped');
                     flippedCards = [];
-                    
+
                     // Pass turn to next player
                     currentTurnIndex = (currentTurnIndex + 1) % players.length;
                     updateTurnDisplay();
                     updateScoreboard();
-                    
+
                     isBoardLocked = false;
                 }, 1000);
             }
@@ -904,7 +943,7 @@
 
         function finishGame() {
             AudioFX.playWin();
-            
+
             // Trigger Confetti
             if (window.confetti) {
                 confetti({
